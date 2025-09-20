@@ -1,0 +1,4 @@
+README
+I often open many web pages without actually reading them, but I think they might be useful in the future. So I add them to the favorites list. However, after doing so, I basically forget about them. When I close the browser, I regret not closing them. Being in a dilemma between closing them (which would take up space in the tab bar) and leaving them open (which would make the interface cluttered), I created a "To Be Browsed" plugin. This plugin allows me to put all the opened web pages at once into it. Then, I can close all the open pages at once, and now the world is much quieter. Please check the contents of the "unview" project.
+
+经常打开很多网页没有看，但又觉得可能未来有用，而加入收藏夹后就基本遗忘了。 在关掉可惜，开着占标签栏空间的两难之间，我搞了一个“待浏览“插件，将所有已经打开的网页一次性全放进去。 然后，就可以把所有开着的网页关闭了，这下世界清静了。 请查看unview项目内容。
