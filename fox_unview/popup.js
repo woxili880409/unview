@@ -430,7 +430,7 @@ function showNotification(message) {
   notification.style.bottom = '10px';
   notification.style.right = '10px';
   notification.style.padding = '10px 15px';
-  notification.style.backgroundColor = '#4285f4';
+  notification.style.backgroundColor = '#0078d7';
   notification.style.color = 'white';
   notification.style.borderRadius = '4px';
   notification.style.zIndex = '1000';
