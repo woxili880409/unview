@@ -9,10 +9,21 @@
 <body>
   <div class="container">
     <h1>待浏览列表</h1>
-    <div class="buttons">
-      <button id="addCurrentPage">添加当前页面</button>
-      <button id="addAllTabs">添加所有标签页</button>
-      <button id="removeDuplicates">去重</button>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="搜索网址标题...">
+    </div>
+    <div class="button-group">
+      <div class="buttons">
+        <button id="addCurrentPage">添加当前页面</button>
+        <button id="addAllTabs">添加所有标签页</button>
+        <button id="removeDuplicates">去重</button>
+      </div>
+      <div class="buttons">
+        <button id="closeOtherTabs">关闭其他标签页</button>
+        <button id="exportData">导出数据</button>
+        <button id="importData">导入数据</button>
+      </div>
+      <input type="file" id="fileInput" accept=".json" style="display: none;">
     </div>
     <div id="listContainer" class="list-container">
       <!-- 待浏览列表将在这里显示 -->

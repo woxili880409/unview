@@ -3,6 +3,130 @@ const addCurrentPageBtn = document.getElementById('addCurrentPage');
 const addAllTabsBtn = document.getElementById('addAllTabs');
 const removeDuplicatesBtn = document.getElementById('removeDuplicates');
 const listContainer = document.getElementById('listContainer');
+const searchInput = document.getElementById('searchInput');
+const exportDataBtn = document.getElementById('exportData');
+const importDataBtn = document.getElementById('importData');
+const fileInput = document.getElementById('fileInput');
+const closeOtherTabsBtn = document.getElementById('closeOtherTabs');
+
+// 添加搜索功能事件监听
+searchInput.addEventListener('input', () => {
+  loadUrls(searchInput.value.toLowerCase());
+});
+
+// 导出数据到本地文件
+exportDataBtn.addEventListener('click', async () => {
+  try {
+    const data = await chrome.storage.local.get('urlsByDate');
+    const urlsByDate = data.urlsByDate || {};
+    
+    // 将数据转换为JSON字符串
+    const jsonData = JSON.stringify(urlsByDate, null, 2);
+    
+    // 创建Blob对象
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // 创建下载链接
+    const a = document.createElement('a');
+    a.href = url;
+    // 以当前日期作为文件名
+    const today = new Date().toISOString().split('T')[0];
+    a.download = `待浏览列表备份_${today}.json`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // 清理
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    
+    showNotification('数据已成功导出到本地文件');
+  } catch (error) {
+    console.error('导出数据失败:', error);
+    showNotification('导出数据失败，请重试');
+  }
+});
+
+// 关闭除当前页面外的其他所有标签页
+closeOtherTabsBtn.addEventListener('click', async () => {
+  try {
+    // 获取当前窗口的所有标签页
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+    // 获取当前活动标签页
+    const activeTab = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    if (tabs.length <= 1) {
+      showNotification('没有其他标签页可关闭');
+      return;
+    }
+    
+    // 显示确认对话框
+    if (confirm(`确定要关闭除当前页外的 ${tabs.length - 1} 个标签页吗？`)) {
+      // 收集所有非活动标签页的ID
+      const tabsToClose = tabs.filter(tab => tab.id !== activeTab[0].id).map(tab => tab.id);
+      
+      // 关闭这些标签页
+      await chrome.tabs.remove(tabsToClose);
+      showNotification(`已关闭 ${tabsToClose.length} 个标签页`);
+    }
+  } catch (error) {
+    console.error('关闭其他标签页失败:', error);
+    showNotification('关闭其他标签页失败，请重试');
+  }
+});
+
+// 导入数据从本地文件
+importDataBtn.addEventListener('click', () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', async (e) => {
+  try {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // 检查文件类型
+    if (!file.name.endsWith('.json')) {
+      showNotification('请选择JSON格式的文件');
+      fileInput.value = ''; // 重置文件输入
+      return;
+    }
+    
+    // 读取文件内容
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const jsonData = event.target.result;
+        const urlsByDate = JSON.parse(jsonData);
+        
+        // 显示确认对话框，警告用户导入会覆盖现有数据
+        if (confirm('导入数据将会覆盖现有列表，确定要继续吗？')) {
+          // 保存导入的数据
+          await chrome.storage.local.set({ urlsByDate });
+          showNotification('数据已成功导入');
+          loadUrls(); // 重新加载列表
+        }
+      } catch (parseError) {
+        console.error('解析文件失败:', parseError);
+        showNotification('文件格式错误，无法导入数据');
+      }
+    };
+    
+    reader.onerror = () => {
+      console.error('读取文件失败');
+      showNotification('读取文件失败，请重试');
+    };
+    
+    reader.readAsText(file);
+  } catch (error) {
+    console.error('导入数据失败:', error);
+    showNotification('导入数据失败，请重试');
+  } finally {
+    fileInput.value = ''; // 重置文件输入
+  }
+});
 
 // 初始化页面时加载待浏览列表
 loadUrls();
@@ -116,7 +240,7 @@ async function addUrlToList(url, title) {
 }
 
 // 加载并显示待浏览列表
-async function loadUrls() {
+async function loadUrls(searchTerm = '') {
   try {
     const data = await chrome.storage.local.get('urlsByDate');
     const urlsByDate = data.urlsByDate || {};
@@ -136,6 +260,8 @@ async function loadUrls() {
     // 获取所有日期并按降序排序
     const dates = Object.keys(urlsByDate).sort((a, b) => new Date(b) - new Date(a));
     
+    let hasVisibleUrls = false;
+    
     // 为每个日期创建分组
     for (const date of dates) {
       const urls = urlsByDate[date];
@@ -144,14 +270,48 @@ async function loadUrls() {
       const dateGroup = document.createElement('div');
       dateGroup.className = 'date-group';
       
-      // 创建日期标题
+      // 创建日期标题容器
       const dateHeader = document.createElement('div');
       dateHeader.className = 'date-header';
-      dateHeader.textContent = formatDate(date);
+      
+      // 创建折叠/展开按钮
+      const toggleBtn = document.createElement('span');
+      toggleBtn.className = 'toggle-btn';
+      toggleBtn.textContent = '▼'; // 默认展开
+      dateHeader.appendChild(toggleBtn);
+      
+      // 创建日期文本
+      const dateText = document.createElement('span');
+      dateText.className = 'date-text';
+      dateText.textContent = formatDate(date);
+      dateHeader.appendChild(dateText);
+      
       dateGroup.appendChild(dateHeader);
+      
+      // 创建URL列表容器
+      const urlsContainer = document.createElement('div');
+      urlsContainer.className = 'urls-container';
+      dateGroup.appendChild(urlsContainer);
+      
+      // 添加折叠/展开功能
+      dateHeader.addEventListener('click', () => {
+        const isExpanded = toggleBtn.textContent === '▼';
+        toggleBtn.textContent = isExpanded ? '▶' : '▼';
+        urlsContainer.style.display = isExpanded ? 'none' : 'block';
+      });
+      
+      let hasVisibleUrlsInDate = false;
       
       // 为每个URL创建条目
       urls.forEach((urlInfo, index) => {
+        // 根据搜索词过滤URL
+        if (searchTerm && !urlInfo.title.toLowerCase().includes(searchTerm) && !urlInfo.url.toLowerCase().includes(searchTerm)) {
+          return;
+        }
+        
+        hasVisibleUrls = true;
+        hasVisibleUrlsInDate = true;
+        
         const urlItem = document.createElement('div');
         urlItem.className = 'url-item';
         
@@ -171,10 +331,21 @@ async function loadUrls() {
         });
         urlItem.appendChild(deleteBtn);
         
-        dateGroup.appendChild(urlItem);
+        urlsContainer.appendChild(urlItem); // 将URL项添加到URL容器中
       });
       
-      listContainer.appendChild(dateGroup);
+      // 只有当该日期有可见的URL时，才添加到列表容器
+      if (hasVisibleUrlsInDate) {
+        listContainer.appendChild(dateGroup);
+      }
+    }
+    
+    // 如果搜索后没有匹配的URL，显示提示信息
+    if (!hasVisibleUrls) {
+      const noResultsMessage = document.createElement('div');
+      noResultsMessage.className = 'empty-message';
+      noResultsMessage.textContent = '没有找到匹配的URL';
+      listContainer.appendChild(noResultsMessage);
     }
   } catch (error) {
     console.error('加载URL列表失败:', error);

@@ -22,6 +22,44 @@ h1 {
   text-align: center;
 }
 
+.search-container {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+
+#searchInput:focus {
+  border-color: #4285f4;
+}
+
+.toggle-btn {
+  margin-right: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  width: 16px;
+  display: inline-block;
+  text-align: center;
+}
+
+date-text {
+  flex: 1;
+}
+
+.urls-container {
+  display: block;
+}
+
 .buttons {
   display: flex;
   gap: 8px;
@@ -67,6 +105,13 @@ button:active {
   padding: 8px 12px;
   font-weight: bold;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.date-text {
+  flex: 1;
 }
 
 .url-item {
