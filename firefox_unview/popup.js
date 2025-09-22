@@ -77,11 +77,18 @@ closeOtherTabsBtn.addEventListener('click', async () => {
 });
 
 // 导入数据从本地文件
-importDataBtn.addEventListener('click', () => {
+importDataBtn.addEventListener('click', async () => {
   // 显示确认对话框，警告用户导入会覆盖现有数据
   if (confirm('导入数据将会覆盖现有列表，确定要继续吗？')) {
     // 在Firefox中，直接打开background页面让用户点击按钮导入数据
-    browser.runtime.sendMessage({ action: 'openFileDialog' });
+    // 获取当前窗口的位置
+    const windowInfo = await browser.windows.getCurrent();
+    const windowWidth = windowInfo.width;
+    const windowTop = windowInfo.top;
+    console.log('Popup窗口位置:', { windowWidth, windowTop });
+
+    // 打开background页面
+    browser.runtime.sendMessage({ action: 'openFileDialog', windowWidth, windowTop });
 
     // 提示用户在background页面上点击导入按钮
     showNotification('请在弹出的background页面中点击"导入JSON文件"按钮');
@@ -214,6 +221,7 @@ async function addUrlToList(url, title) {
 async function loadUrls(searchTerm = '') {
   try {
     const data = await browser.storage.local.get('urlsByDate');
+    console.log('urlsByDate:', data.urlsByDate);
     const urlsByDate = data.urlsByDate || {};
 
     // 清空列表容器
@@ -291,6 +299,18 @@ async function loadUrls(searchTerm = '') {
         urlLink.href = urlInfo.url;
         urlLink.target = '_blank';
         urlLink.textContent = urlInfo.title || urlInfo.url;
+        
+        // 添加点击事件监听器，使用browser.tabs.create确保在新标签页打开
+        urlLink.addEventListener('click', async (e) => {
+          e.preventDefault(); // 阻止默认行为
+          try {
+            await browser.tabs.create({ url: urlInfo.url, active: true });
+          } catch (error) {
+            console.error('打开链接失败:', error);
+            showNotification('打开链接失败，请重试');
+          }
+        });
+        
         urlItem.appendChild(urlLink);
 
         // 创建删除按钮

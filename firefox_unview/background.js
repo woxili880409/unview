@@ -3,12 +3,13 @@
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'openFileDialog') {
     // 触发文件选择对话框
-    sendMessageToPopup({ action: 'openFileDialog' });
+    sendMessageToPopup({ action: 'openFileDialog', windowWidth: message.windowWidth, windowTop: message.windowTop });
+    
     let createData = {
       type: "detached_panel",
       url: "file_open.html",
-      width: 350,
-      height: 350,
+      width: 365,
+      height: 365,
       incognito: false,
       focused: true
     };
@@ -16,8 +17,8 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     browser.windows.create(createData).then((window) => {
       // 窗口创建成功后，将窗口居中
       browser.windows.update(window.id, {
-        left: Math.round((screen.width - window.width) / 2),
-        top: Math.round((screen.height - window.height) / 2)
+        left: message.windowWidth-365-58, //窗口左边距为窗口宽度减去窗口宽度
+        top: message.windowTop+58*2 //firefox 80px的标题栏高度
       });
     });
     // 监听窗口关闭事件
