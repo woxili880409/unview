@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "待浏览列表",
+  "description": "将当前打开的网页地址归纳到待浏览列表，并按日期分组和去重功能",
+  "version": "1.0",
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "history"
+  ],
+  "background": {
+    "page": "background.html"
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  }
+}
