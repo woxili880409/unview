@@ -9,7 +9,9 @@
 - popup 窗口每次打开时，从 storage 中加载内容
 - 也尝试过在background.html中放置一个隐藏的 input 元素，并监听其 change 事件，但是除了browser.browserAction事件能够调用input.click()方法外，其他事件都无法调用input.click()方法，因此放弃了这种方法。究其原因，依然是firefox的扩展安全机制限制input.click()方法的调用。
 - 在`manifest.json`的`persistent`属性中增加了`tabs`和`history`权限，`tabs`权限如果不加，则无法获取其他标签的链接，`history`权限如果不加，则无法清除browser.windows.create()方法创建新标签页的历史记录。而在chrome的插件中，在没有显示的加入`tabs`权限的情况下， popup 窗口可以正常工作。
-- 总结一下，firefox的安全机制使chrome插件的迁移变得复杂，需要考虑更多安全和兼容性问题。同时也能感觉到现有AI助手对firefox的特殊性了解不足，而且firefox的扩展开发docs让人非常难以发现其与chrome不兼容的地方，我用两周末的2天时间才找出了解决问题的方法。这和我对firefox的扩展开发不很熟悉有关，但也侧面证明了firefox的扩展开发环境相对chrome来说更加复杂、学习曲线陡峭。
+- firefox的安全机制使chrome插件的迁移变得复杂，需要考虑更多安全和兼容性问题。同时也能感觉到现有AI助手对firefox的特殊性了解不足，而且firefox的扩展开发docs让人非常难以发现其与chrome不兼容的地方，找解决问题的方法花了相当长的时间。firefox和chrome扩展开发的差别增加了开发者的学习成本，也增加了插件的维护成本。
+- 这个firefox插件本身是为了测试AI助手的能力，由于对firefox的扩展开发不熟悉，可能解决兼容性问题的方式并不专业,还请高手给予指正。
+- 最后，AI助手目前是一个有益的帮手，但是解决新问题时，还需要开发人员自己找到解决办法。有了解决办法，让AI助手去做常规的编码工作，会大幅度提升效率。
 
 ## 功能特点
 
