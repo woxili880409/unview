@@ -2,7 +2,14 @@
   "manifest_version": 2,
   "name": "待浏览列表",
   "description": "将当前打开的网页地址归纳到待浏览列表，并按日期分组和去重功能",
-  "version": "1.0",
+  "version": "1.0.1",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tszhangou@sina.com"
+    }
+  },
+
   "browser_action": {
     "default_popup": "popup.html",
     "default_icon": {
